@@ -69,7 +69,7 @@ module.exports = {
   npm install babel-loader babel-core babel-preset-es2015 --save-dev
   ```
 
-​	__babel-loader 的缺点就是编译很慢，所以我们在配置的时候，一定要配置好哪些目录是需要编译的，哪些是不需要编译的，通过 `exclude` 配置项就能排除那些不需要编译的目录或文件了。__
+  ​__babel-loader 的缺点就是编译很慢，所以我们在配置的时候，一定要配置好哪些目录是需要编译的，哪些是不需要编译的，通过 `exclude` 配置项就能排除那些不需要编译的目录或文件了。__
 
 基础配置如下：
 
@@ -387,7 +387,6 @@ loaders: [
 ```
 
 
-
 在有了 webpack.config.js 配置文件之后，我们就可以直接在命令行执行
 
 ``` bash
@@ -413,5 +412,66 @@ webpack-dev-server --progress --colors
 
 使用这个开发者工具将会在本地的 `8080 ` 端口启动一个小型的 `express` 服务，用来作为静态文件的服务器，`webpack-dev-server` 使用的是 `webpack --watch ` 模式来监听文件变化的。启动服务之后，打开  [http://localhost:8080/webpack-dev-server/bundle](http://localhost:8080/webpack-dev-server/bundle) 来访问我们 Demo 文件。
 
-__webpack-dev-server 使用  `watch` 模式，它会阻止 webpack 发射目标文件的改动到本地硬盘的文件中，取而代之的是将文件的改动存储到内存中__
+__webpack-dev-server 使用  `watch` 模式，它会阻止 webpack 发射目标文件的改动到本地硬盘的文件中，取而代之的是将文件的改动存储到内存中；__ 所以，在这个时候，我们去查看本地的文件编译过的文件的时候，发现文件并没有被立即更新为最新的修改，因为所有的改动都还在内存中，这点要主要下。
 
+如果需要修改 `webpack-dev-server` 服务监听端口，需要在 `webpack.config.js` 文件中配置
+
+``` javascript
+module.exports = {
+  xx: xxxx,
+  devServer: {
+    port: 8088	//修改成我们需要的端口
+  }
+}
+```
+
+
+
+### 按照目录层级导出文件
+
+如果我们希望像下图中一样按照目录层级打包编译源文件该怎么配置呢？
+
+``` shell
+├── demo.html
+├── dist
+│   └── static
+│       └── js
+│           ├── demo.js
+│           └── index.js
+├── index.html
+├── static
+│   ├── css
+│   │   └── index.css
+│   ├── images
+│   │   └── phone.jpg
+│   └── js
+│       ├── common.js
+│       ├── demo.js
+│       └── index.js
+└── webpack.config.js
+```
+
+很简单，配置如下：我们需要将目录层级关系体现在 entry 的里面
+
+``` javascript
+module.exports = {
+  entry: {
+    'static/js/index': './static/js/index.js',
+    'static/js/demo': './static/js/demo.js'
+  },
+  output: {
+    path: assetsRoot,
+    publicPath: '/static/',
+    filename: '[name].js'
+  }
+}
+```
+
+
+
+### 故障处理
+
+webpack 的配置信息比较复杂，很容易出现错误，但是一般情况下 webpack 只会打印出一些简单的信息，这个时候，我们可以通过参数 `--display-error-details` 来打印错误详情。
+``` bash
+webpack --display-error-details
+```
